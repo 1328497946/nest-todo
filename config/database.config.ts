@@ -8,6 +8,7 @@ const baseConfig: DataSourceOptions = {
   username: 'root',
   password: 'Ywc1989@@',
   database: 'nest-todo',
+  synchronize: false,
 };
 
 // 该对象用于 nestjs typeorm 初始化

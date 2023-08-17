@@ -9,6 +9,7 @@ const baseConfig = {
     username: 'root',
     password: 'Ywc1989@@',
     database: 'nest-todo',
+    synchronize: false,
 };
 exports.ormConfig = {
     ...baseConfig,
