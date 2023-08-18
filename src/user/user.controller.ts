@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -17,7 +18,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  createUser(@Body() createUserDto: CreateUserDto) {
+  createUser(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
 
@@ -34,7 +35,7 @@ export class UserController {
   @Patch(':id')
   updateUserInfoById(
     @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
     return this.userService.updateUserInfoById(id, updateUserDto);
   }
