@@ -1,5 +1,10 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 
+/**
+ * ormConfig去dist文件夹下查找entity，因为nestjs最终运行的是打包好的entity.js文件
+ * ormConfigForCli则可以直接运行编写好的文件，因此会在源代码中查找entity.ts文件
+ */
+
 // 基础配置
 const baseConfig: DataSourceOptions = {
   type: 'mysql',

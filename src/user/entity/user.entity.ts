@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Generated,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -6,11 +13,21 @@ export class User {
   id: number;
 
   @Column()
-  firstName: string;
+  @Generated('uuid')
+  user_id: number;
+
+  @Column({ unique: true })
+  name: string;
 
   @Column()
-  lastName: string;
+  password: string;
 
-  @Column()
+  @Column({ nullable: true })
   age: number;
+
+  @CreateDateColumn()
+  create_date: string;
+
+  @UpdateDateColumn()
+  update_date: string;
 }
