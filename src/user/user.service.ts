@@ -33,6 +33,9 @@ export class UserService {
   }
 
   async updateUserInfoById(id: number, updateUserDto: UpdateUserDto) {
+    // if (Object.keys(updateUserDto).length === 0) {
+    // return;
+    // }
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       return '该用户不存在';
