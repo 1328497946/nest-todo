@@ -28,7 +28,6 @@ export class UserController {
     )
     createUserDto: CreateUserDto,
   ) {
-    console.log(createUserDto, 'xxxx');
     return this.userService.createUser(createUserDto);
   }
 

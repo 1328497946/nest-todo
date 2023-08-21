@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +15,11 @@ export class UserService {
   // 创建用户
   async createUser(createUserDto: CreateUserDto) {
     try {
-      const newUser = await this.userRepository.create(createUserDto);
+      const saltOrRounds = 10;
+      const { password, ...rest } = createUserDto;
+      const hash = await bcrypt.hash(password, saltOrRounds);
+      Object.assign(rest, { password: hash });
+      const newUser = await this.userRepository.create(rest);
       return await this.userRepository.save(newUser);
     } catch (error) {
       throw new InternalServerErrorException('服务器错误');
