@@ -18,7 +18,17 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  createUser(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
+  createUser(
+    @Body(
+      new ValidationPipe({
+        // 删除不是给定dto的字段
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    )
+    createUserDto: CreateUserDto,
+  ) {
+    console.log(createUserDto, 'xxxx');
     return this.userService.createUser(createUserDto);
   }
 
