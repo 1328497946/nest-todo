@@ -4,7 +4,6 @@ import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import LoginUserDto from 'src/user/dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,19 +12,24 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(dto: LoginUserDto) {
-    const user = await this.userRepository.findOne({
-      where: { name: dto.name },
-    });
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-    const payload = { name: user.name, user_id: user.user_id };
-    const token = await this.jwtService.signAsync(payload);
+  async validateUser(name: string, password: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { name } });
     if (!user) {
       throw new UnauthorizedException('用户不存在');
     }
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('密码错误');
     }
-    return { ...user, token };
+    return user;
+  }
+
+  async login(user: User) {
+    const payload = { name: user.name, sub: user.user_id };
+    delete user.password;
+    return {
+      ...user,
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }
