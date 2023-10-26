@@ -17,7 +17,8 @@ export class UserService {
     try {
       const saltOrRounds = 10;
       const { password, ...rest } = createUserDto;
-      const hash = await bcrypt.hash(password, saltOrRounds);
+      const salt = bcrypt.genSaltSync(saltOrRounds);
+      const hash = bcrypt.hashSync(password, salt);
       Object.assign(rest, { password: hash });
       const newUser = await this.userRepository.create(rest);
       return await this.userRepository.save(newUser);

@@ -12,11 +12,13 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @Public()
   @Post()
   createUser(
     @Body(

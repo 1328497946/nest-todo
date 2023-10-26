@@ -17,7 +17,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('用户不存在');
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException('密码错误');
     }
