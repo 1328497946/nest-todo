@@ -4,12 +4,14 @@ import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(name: string, password: string): Promise<User> {
@@ -27,9 +29,28 @@ export class AuthService {
   async login(user: User) {
     const payload = { name: user.name, sub: user.user_id };
     delete user.password;
+    const tokens = await this.getTokens(payload);
     return {
       ...user,
-      access_token: this.jwtService.sign(payload),
+      ...tokens,
+    };
+  }
+
+  // 生成Token和refreshToken
+  async getTokens(payload: { name: string; sub: number }) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('accessTokenSecret'),
+        expiresIn: this.configService.get<string>('accessTokenExpired'),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('refreshTokenSecret'),
+        expiresIn: this.configService.get<string>('refreshTokenExpired'),
+      }),
+    ]);
+    return {
+      accessToken,
+      refreshToken,
     };
   }
 }

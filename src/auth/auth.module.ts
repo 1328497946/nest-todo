@@ -4,21 +4,20 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
 import { LocalStrategy } from './local.strategy';
-import { JwtStrategy } from './jwt.strategy';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtStrategy } from './accessToken.strategy';
+import { accessTokenGuard } from './accessToken.guard';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([User]),
     PassportModule,
     JwtModule.register({
       global: true,
-      secret: jwtConstants.access_token_secret,
-      signOptions: { expiresIn: jwtConstants.access_token_expired },
     }),
   ],
   controllers: [AuthController],
@@ -27,8 +26,9 @@ import { JwtAuthGuard } from './jwt-auth.guard';
     LocalStrategy,
     JwtStrategy,
     {
+      // 全局accessTokenGuard
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: accessTokenGuard,
     },
   ],
   exports: [AuthService],

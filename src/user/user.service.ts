@@ -44,7 +44,6 @@ export class UserService {
 
   async updateUserInfoById(id: number, updateUserDto: UpdateUserDto) {
     if (Object.keys(updateUserDto).length === 0) {
-      console.log('没有任何变更');
       return;
     }
     const user = await this.userRepository.findOne({ where: { id } });
