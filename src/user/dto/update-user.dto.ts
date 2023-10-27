@@ -5,3 +5,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   access_token?: string;
   refresh_token?: string;
 }
+
+// OmitType(CreateCatDto, ['name'] as const) {}
