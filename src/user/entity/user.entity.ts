@@ -35,4 +35,10 @@ export class User {
 
   @UpdateDateColumn()
   update_date: string;
+
+  @Column({ nullable: true })
+  accessToken: string;
+
+  @Column({ nullable: true })
+  refreshToken: string;
 }

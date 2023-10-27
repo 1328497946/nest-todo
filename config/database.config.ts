@@ -8,8 +8,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 // 基础配置
 const baseConfig: DataSourceOptions = {
   type: 'mysql',
-  host: 'localhost',
-  port: 3308,
+  host: '127.0.0.1',
+  port: 3306,
   username: 'root',
   password: 'Ywc1989@@',
   database: 'nest-todo',

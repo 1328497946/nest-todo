@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private userService: UserService,
   ) {}
 
   async validateUser(name: string, password: string): Promise<User> {
@@ -52,5 +54,19 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  hashData(data: string) {
+    return bcrypt.hashSync(
+      data,
+      this.configService.get<string>('saltOrRounds'),
+    );
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const hashedRefreshToken = this.hashData(refreshToken);
+    await this.userService.updateUserInfoById(userId, {
+      refreshToken: hashedRefreshToken,
+    });
   }
 }
