@@ -15,7 +15,7 @@ export class User {
 
   @Column()
   @Generated('uuid')
-  user_id: number;
+  user_id: string;
 
   @Column({ unique: true })
   name: string;
@@ -37,8 +37,5 @@ export class User {
   update_date: string;
 
   @Column({ nullable: true })
-  accessToken: string;
-
-  @Column({ nullable: true })
-  refreshToken: string;
+  refresh_token: string;
 }

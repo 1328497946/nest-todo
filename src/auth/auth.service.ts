@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
+import { JwtPayload } from './interface';
 
 @Injectable()
 export class AuthService {
@@ -30,17 +35,38 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { name: user.name, sub: user.user_id };
-    delete user.password;
     const tokens = await this.getTokens(payload);
+    this.updateRefreshToken(user.user_id, tokens.refresh_token);
+    delete user.password;
     return {
       ...user,
       ...tokens,
     };
   }
 
+  // async signup() {}
+
+  async logout(userId: string) {
+    return this.userService.updateUserInfoById(userId, { refresh_token: null });
+  }
+
+  async refreshTokens(userId: string, refresh_token: string) {
+    const user = await this.userService.getUserById(userId);
+    if (!user || !user.refresh_token) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const isMatch = bcrypt.compareSync(refresh_token, user.refresh_token);
+    if (!isMatch) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const tokens = await this.getTokens({ name: user.name, sub: user.user_id });
+    await this.updateRefreshToken(user.user_id, tokens.refresh_token);
+    return tokens;
+  }
+
   // 生成Token和refreshToken
-  async getTokens(payload: { name: string; sub: number }) {
-    const [accessToken, refreshToken] = await Promise.all([
+  async getTokens(payload: JwtPayload) {
+    const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('accessTokenSecret'),
         expiresIn: this.configService.get<string>('accessTokenExpired'),
@@ -51,8 +77,8 @@ export class AuthService {
       }),
     ]);
     return {
-      accessToken,
-      refreshToken,
+      access_token,
+      refresh_token,
     };
   }
 
@@ -63,10 +89,11 @@ export class AuthService {
     );
   }
 
-  async updateRefreshToken(userId: number, refreshToken: string) {
-    const hashedRefreshToken = this.hashData(refreshToken);
+  // 更新数据库用户的refreshToken
+  async updateRefreshToken(userId: string, token: string) {
+    const hashedRefreshToken = this.hashData(token);
     await this.userService.updateUserInfoById(userId, {
-      refreshToken: hashedRefreshToken,
+      refresh_token: hashedRefreshToken,
     });
   }
 }

@@ -37,16 +37,18 @@ export class UserService {
   }
 
   // 根据ID获取用户
-  async getUserById(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
-    return user ? user : '用户不存在';
+  async getUserById(user_id: string) {
+    return await this.userRepository.findOne({ where: { user_id } });
   }
 
-  async updateUserInfoById(id: number, updateUserDto: UpdateUserDto) {
+  // 通过user_id(UUID)
+  async updateUserInfoById(userId: string, updateUserDto: UpdateUserDto) {
     if (Object.keys(updateUserDto).length === 0) {
       return;
     }
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
     if (!user) {
       return '该用户不存在';
     }

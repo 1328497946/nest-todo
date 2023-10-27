@@ -28,7 +28,6 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       return null;
     }
-    delete user.password;
-    return { ...user };
+    return payload;
   }
 }

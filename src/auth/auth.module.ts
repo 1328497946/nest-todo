@@ -11,6 +11,7 @@ import { AccessTokenStrategy } from './accessToken.strategy';
 import { accessTokenGuard } from './accessToken.guard';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
+import { RefreshTokenStrategy } from './refreshToken.strategy';
 
 @Module({
   imports: [
@@ -22,14 +23,15 @@ import { UserService } from 'src/user/user.service';
   controllers: [AuthController],
   providers: [
     AuthService,
+    UserService,
     LocalStrategy,
     AccessTokenStrategy,
+    RefreshTokenStrategy,
     {
       // 全局accessTokenGuard
       provide: APP_GUARD,
       useClass: accessTokenGuard,
     },
-    UserService,
   ],
   exports: [AuthService],
 })
