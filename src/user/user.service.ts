@@ -42,7 +42,10 @@ export class UserService {
   }
 
   // 通过user_id(UUID)
-  async updateUserInfoById(userId: string, updateUserDto: UpdateUserDto) {
+  async updateUserInfoById(
+    userId: string,
+    updateUserDto: UpdateUserDto | CreateUserDto,
+  ) {
     if (Object.keys(updateUserDto).length === 0) {
       return;
     }
@@ -56,8 +59,8 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async deleteUserById(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async deleteUserById(id: string) {
+    const user = await this.userRepository.findOne({ where: { user_id: id } });
     if (!user) {
       return '该用户不存在';
     }

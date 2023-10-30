@@ -4,12 +4,11 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -21,20 +20,20 @@ export class UserController {
   }
 
   @Get(':id')
-  getUserById(@Param('id', ParseIntPipe) id: string) {
+  getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
 
   @Patch(':id')
   updateUserInfoById(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
   ) {
-    return this.userService.updateUserInfoById(id, updateUserDto);
+    return this.userService.updateUserInfoById(id, createUserDto);
   }
 
   @Delete(':id')
-  deleteUserById(@Param('id') id: number) {
+  deleteUserById(@Param('id') id: string) {
     return this.userService.deleteUserById(id);
   }
 }

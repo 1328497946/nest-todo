@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
-import { JwtPayload } from './interface';
+import { JwtPayload } from '../interface';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

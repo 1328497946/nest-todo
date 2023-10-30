@@ -6,12 +6,12 @@ import { User } from 'src/user/entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
-import { LocalStrategy } from './local.strategy';
-import { AccessTokenStrategy } from './accessToken.strategy';
-import { accessTokenGuard } from './accessToken.guard';
+import { LocalStrategy } from './strategy/local.strategy';
+import { AccessTokenStrategy } from './strategy/accessToken.strategy';
+import { accessTokenGuard } from './guard/accessToken.guard';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
-import { RefreshTokenStrategy } from './refreshToken.strategy';
+import { RefreshTokenStrategy } from './strategy/refreshToken.strategy';
 
 @Module({
   imports: [
