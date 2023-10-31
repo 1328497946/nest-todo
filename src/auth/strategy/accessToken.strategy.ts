@@ -22,6 +22,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload) {
     const { sub: userId } = payload;
+    // 校验是否token中的userId用户存在
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
     });

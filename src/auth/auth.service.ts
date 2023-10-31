@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,14 +12,16 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
 import { JwtPayload } from './interface';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
   async validateUser(name: string, password: string): Promise<User> {
@@ -46,7 +49,12 @@ export class AuthService {
 
   // async signup() {}
 
-  async logout(userId: string) {
+  async logout(userId: string, accessToken: string) {
+    const user = await this.userService.getUserById(userId);
+    const refreshToken = user.refresh_token;
+    // 将access_token和refresh_token放入黑名单
+    await this.redis.lpush('AccessTokenBlacklist', accessToken);
+    await this.redis.lpush('RefreshTokenBlacklist', refreshToken);
     return this.userService.updateUserInfoById(userId, { refresh_token: null });
   }
 
@@ -92,8 +100,19 @@ export class AuthService {
   // 更新数据库用户的refreshToken
   async updateRefreshToken(userId: string, token: string) {
     const hashedRefreshToken = this.hashData(token);
-    await this.userService.updateUserInfoById(userId, {
-      refresh_token: hashedRefreshToken,
-    });
+    // refresh_token放入黑名单
+    const user = await this.userService.getUserById(userId);
+    if (user) {
+      /**
+       * TODO
+       * 拿不到accessToken
+       * 在刷新accessToken的时候无法将上次的accessToken置为失效
+       * 可以将accessToken存入数据库，取出来置为失效、
+       */
+      await this.redis.lpush('RefreshTokenBlacklist', user.refresh_token);
+      await this.userService.updateUserInfoById(userId, {
+        refresh_token: hashedRefreshToken,
+      });
+    }
   }
 }

@@ -12,6 +12,7 @@ import { accessTokenGuard } from './guard/accessToken.guard';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
 import { RefreshTokenStrategy } from './strategy/refreshToken.strategy';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RefreshTokenStrategy } from './strategy/refreshToken.strategy';
     TypeOrmModule.forFeature([User]),
     PassportModule,
     JwtModule.register({ global: true }),
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -11,4 +11,6 @@ export default () => ({
   refreshTokenSecret:
     'eJzpCxo+P5Rl4EyB33SLcNr0z6KmzxPAqE982s2qW+av4XscJKmWEkpdDmND67914/aZ6t3d3OwjaWS3exQkvGDQ6xLSP2uIk65bu1VgrUfJiOxIuWliNtGEaGPn6sJubK2Pk7iLt0E9Qrho5JEhh7eeKUU03RjKpfGJJ4NRmqS6vV5ouDUuCsbNFRYHgWYrAZsBSj8HfFqBuaW/b4Xkkj1DJjgovmKzReq1RVWmgMna0ATYQtnHAWFQ02qVEa/FR9W1v9KgtBQmZv3QjEG9Bcl1Xa1MC8f6y+tKV2s27/4atuBDWq1J8PsU18PyfOwRjjGZ07Y1JSofQlFHt6y1Lw==',
   refreshTokenExpired: '1y',
+  redis_port: 6379,
+  redis_addr: 'localhost',
 });
