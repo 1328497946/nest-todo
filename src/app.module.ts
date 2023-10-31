@@ -8,6 +8,8 @@ import { DataSourceOptions } from 'typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -22,9 +24,11 @@ import { RedisModule } from './redis/redis.module';
       },
       inject: [ConfigService],
     }),
-    UserModule,
     AuthModule,
+    UserModule,
     RedisModule,
+    ScheduleModule.forRoot(),
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

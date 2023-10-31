@@ -52,7 +52,6 @@ export class AuthController {
 
   @Get('logout')
   logout(@Req() req: Request, @BearerToken() token: string) {
-    console.log(req.user, 'yy');
     return this.authService.logout(req.user['sub'], token);
   }
 
