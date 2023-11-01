@@ -8,7 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -27,9 +27,9 @@ export class UserController {
   @Patch(':id')
   updateUserInfoById(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updateUserInfoById(id, createUserDto);
+    return this.userService.updateUserInfoById(id, updateUserDto);
   }
 
   @Delete(':id')

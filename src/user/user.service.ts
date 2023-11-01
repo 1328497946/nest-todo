@@ -57,7 +57,14 @@ export class UserService {
     if (!user) {
       return '该用户不存在';
     }
-    await this.userRepository.merge(user, updateUserDto);
+    const { password, ...rest } = updateUserDto;
+    if (password) {
+      const saltOrRounds = this.configService.get<number>('saltOrRounds');
+      const salt = bcrypt.genSaltSync(saltOrRounds);
+      const hash = bcrypt.hashSync(password, salt);
+      Object.assign(rest, { password: hash });
+    }
+    await this.userRepository.merge(user, rest);
     return await this.userRepository.save(user);
   }
 
