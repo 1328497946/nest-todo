@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Timeout } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { Redis } from 'ioredis';
 
 @Injectable()
@@ -24,26 +24,28 @@ export class TasksService {
    * 45 * * * * *：每隔45秒执行一次
    */
 
-  // 每天0秒执行一次
-  // @Cron('10 * * * * *')
-  @Timeout(5000)
+  /**
+   * token过期时间是15分钟
+   * 每到15分钟执行一次清空在黑名单中的Token
+   */
+  @Cron('* */15 * * * *')
   async handleCron() {
-    const accessTokenBlacklist = await this.redis.lrange(
-      'AccessTokenBlacklist',
-      0,
-      -1,
-    );
-    this.logger.log(accessTokenBlacklist, 'yy');
-    accessTokenBlacklist.map((o) => {
-      // const time = new Date().getTime();
-      this.jwtService
-        .verify(o, {
-          secret: this.configService.get<string>('accessTokenSecret'),
-        })
-        .catch(() => {
-          this.logger.error(o);
-          this.redis.lrem('AccessTokenBlacklist', 0, o);
+    this.removeToken('AccessTokenBlacklist');
+    this.removeToken('RefreshTokenBlacklist');
+  }
+
+  async removeToken(name: string) {
+    this.logger.log(`开始清理${name}黑名单`);
+    const tokens = await this.redis.lrange(name, 0, -1);
+    tokens.map(async (o) => {
+      try {
+        await this.jwtService.verify(o, {
+          secret: this.configService.get<string>(name),
         });
+      } catch (e) {
+        // 移除过期Token
+        await this.redis.lrem(name, 0, o);
+      }
     });
   }
 
