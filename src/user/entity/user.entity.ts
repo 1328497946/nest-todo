@@ -37,5 +37,8 @@ export class User {
   update_date: string;
 
   @Column({ nullable: true })
+  access_token: string;
+
+  @Column({ nullable: true })
   refresh_token: string;
 }

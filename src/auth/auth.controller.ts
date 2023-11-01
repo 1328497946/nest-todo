@@ -17,7 +17,6 @@ import { Request } from 'express';
 import { User } from 'src/user/entity/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
-import { BearerToken } from 'src/redis/decorators/bearerToken.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -51,8 +50,8 @@ export class AuthController {
   }
 
   @Get('logout')
-  logout(@Req() req: Request, @BearerToken() token: string) {
-    return this.authService.logout(req.user['sub'], token);
+  logout(@Req() req: Request) {
+    return this.authService.logout(req.user['sub']);
   }
 
   @Public()

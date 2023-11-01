@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Cron } from '@nestjs/schedule';
+// import { Cron } from '@nestjs/schedule';
 import { Redis } from 'ioredis';
 
 @Injectable()
@@ -28,11 +28,11 @@ export class TasksService {
    * token过期时间是15分钟
    * 每到15分钟执行一次清空在黑名单中的Token
    */
-  @Cron('* */15 * * * *')
-  async handleCron() {
-    this.removeToken('AccessTokenBlacklist');
-    this.removeToken('RefreshTokenBlacklist');
-  }
+  // @Cron('* */15 * * * *')
+  // async handleCron() {
+  //   this.removeToken('AccessTokenBlacklist');
+  //   this.removeToken('RefreshTokenBlacklist');
+  // }
 
   async removeToken(name: string) {
     this.logger.log(`开始清理${name}黑名单`);

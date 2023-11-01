@@ -1,10 +1,14 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Redis } from 'ioredis';
 
 @Injectable()
 export class refreshTokenGuard extends AuthGuard('jwt-refresh-token') {
-  constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {
+  constructor(
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    private readonly jwtService: JwtService,
+  ) {
     super();
   }
   async canActivate(context: ExecutionContext): Promise<any> {
@@ -15,9 +19,14 @@ export class refreshTokenGuard extends AuthGuard('jwt-refresh-token') {
     if (request.headers.authorization) {
       const [bearer, token] = request.headers.authorization.split(' ');
       if (bearer === 'Bearer' && token) {
-        const tokenPos = await this.redis.lpos('RefreshTokenBlacklist', token);
-        // 存在黑名单中的话拒绝登录
-        if (tokenPos !== null && tokenPos !== -1) return false;
+        const data: any = await this.jwtService.decode(token);
+        const valid = await this.redis.exists(
+          `${data.sub}:RefreshTokenList:${token}`,
+        );
+        if (valid) {
+          return super.canActivate(context);
+        }
+        return false;
       }
     }
     return super.canActivate(context);

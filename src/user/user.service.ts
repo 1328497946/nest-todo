@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -6,10 +6,12 @@ import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class UserService {
   constructor(
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private configService: ConfigService,
   ) {}
@@ -61,6 +63,21 @@ export class UserService {
 
   async deleteUserById(id: string) {
     const user = await this.userRepository.findOne({ where: { user_id: id } });
+    const refresh_token = user.refresh_token;
+    const access_token = user.access_token;
+    // 将用户的access_token和refresh_token从redis中删除
+    if (access_token) {
+      await this.redis.del(
+        `${id}:AccessTokenList:${access_token}`,
+        access_token,
+      );
+    }
+    if (refresh_token) {
+      await this.redis.del(
+        `${id}:RefreshTokenList:${refresh_token}`,
+        refresh_token,
+      );
+    }
     if (!user) {
       return '该用户不存在';
     }

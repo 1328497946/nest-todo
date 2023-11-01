@@ -38,7 +38,30 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { name: user.name, sub: user.user_id };
+    // 重复调用login接口需要将之前的accessToken和refreshToken重redis中删除
+    // 挤掉登录的情况
+    if (user.access_token) {
+      await this.redis.del(
+        `${user.user_id}:AccessTokenList:${user.access_token}`,
+      );
+    }
+    if (user.refresh_token) {
+      await this.redis.del(
+        `${user.user_id}:RefreshTokenList:${user.refresh_token}`,
+      );
+    }
     const tokens = await this.getTokens(payload);
+    const data: any = await this.jwtService.decode(tokens.access_token, {
+      complete: true,
+    });
+    await this.redis.setex(
+      `${user.user_id}:AccessTokenList:${tokens.access_token}`,
+      data.payload.exp - Math.floor(new Date().getTime() / 1000),
+      tokens.access_token,
+    );
+    await this.userService.updateUserInfoById(user.user_id, {
+      access_token: tokens.access_token,
+    });
     this.updateRefreshToken(user.user_id, tokens.refresh_token);
     delete user.password;
     return {
@@ -48,14 +71,27 @@ export class AuthService {
   }
 
   // async signup() {}
-
-  async logout(userId: string, accessToken: string) {
+  async logout(userId: string) {
     const user = await this.userService.getUserById(userId);
-    const refreshToken = user.refresh_token;
-    // 将access_token和refresh_token放入黑名单
-    await this.redis.lpush('AccessTokenBlacklist', accessToken);
-    await this.redis.lpush('RefreshTokenBlacklist', refreshToken);
-    return this.userService.updateUserInfoById(userId, { refresh_token: null });
+    const refresh_token = user.refresh_token;
+    const access_token = user.access_token;
+    // 将用户的access_token和refresh_token从redis中删除
+    if (access_token) {
+      await this.redis.del(
+        `${userId}:AccessTokenList:${access_token}`,
+        access_token,
+      );
+    }
+    if (refresh_token) {
+      await this.redis.del(
+        `${userId}:RefreshTokenList:${refresh_token}`,
+        refresh_token,
+      );
+    }
+    return this.userService.updateUserInfoById(userId, {
+      access_token: null,
+      refresh_token: null,
+    });
   }
 
   async refreshTokens(userId: string, refresh_token: string) {
@@ -63,16 +99,45 @@ export class AuthService {
     if (!user || !user.refresh_token) {
       throw new ForbiddenException('Access Denied');
     }
-    const isMatch = bcrypt.compareSync(refresh_token, user.refresh_token);
+    const isMatch = refresh_token === user.refresh_token;
     if (!isMatch) {
       throw new ForbiddenException('Access Denied');
     }
-    const tokens = await this.getTokens({ name: user.name, sub: user.user_id });
-    await this.updateRefreshToken(user.user_id, tokens.refresh_token);
-    return tokens;
+    const access_token = user.access_token;
+    // 将用户的access_token从redis中删除
+    if (access_token) {
+      await this.redis.del(
+        `${userId}:AccessTokenList:${access_token}`,
+        access_token,
+      );
+    }
+    const token = await this.getAccessToken({
+      name: user.name,
+      sub: user.user_id,
+    });
+    const data: any = await this.jwtService.decode(token, {
+      complete: true,
+    });
+    await this.redis.setex(
+      `${user.user_id}:AccessTokenList:${token}`,
+      data.payload.exp - Math.floor(new Date().getTime() / 1000),
+      token,
+    );
+    await this.userService.updateUserInfoById(user.user_id, {
+      access_token: token,
+    });
+    return { access_token: token };
   }
 
-  // 生成Token和refreshToken
+  // 生成accessToken
+  async getAccessToken(payload: JwtPayload) {
+    return await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('accessTokenSecret'),
+      expiresIn: this.configService.get<string>('accessTokenExpired'),
+    });
+  }
+
+  // 生成accessToken和refreshToken
   async getTokens(payload: JwtPayload) {
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -99,20 +164,16 @@ export class AuthService {
 
   // 更新数据库用户的refreshToken
   async updateRefreshToken(userId: string, token: string) {
-    const hashedRefreshToken = this.hashData(token);
-    // refresh_token放入黑名单
-    const user = await this.userService.getUserById(userId);
-    if (user) {
-      /**
-       * TODO
-       * 拿不到accessToken
-       * 在刷新accessToken的时候无法将上次的accessToken置为失效
-       * 可以将accessToken存入数据库，取出来置为失效、
-       */
-      await this.redis.lpush('RefreshTokenBlacklist', user.refresh_token);
-      await this.userService.updateUserInfoById(userId, {
-        refresh_token: hashedRefreshToken,
-      });
-    }
+    const data: any = await this.jwtService.decode(token, {
+      complete: true,
+    });
+    await this.redis.setex(
+      `${userId}:RefreshTokenList:${token}`,
+      data.payload.exp - Math.floor(new Date().getTime() / 1000),
+      token,
+    );
+    await this.userService.updateUserInfoById(userId, {
+      refresh_token: token,
+    });
   }
 }
