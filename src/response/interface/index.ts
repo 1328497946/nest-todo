@@ -1,5 +1,5 @@
 export interface Response<T> {
-  path: string;
+  path?: string;
   code: number;
   date?: number;
   success: boolean;

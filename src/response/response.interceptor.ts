@@ -21,12 +21,10 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
   responseHandler(res: T, context: ExecutionContext): Response<T> {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
-    const request = ctx.getRequest();
     const statusCode = response.statusCode;
     return {
-      success: true,
-      path: request.url,
       code: statusCode,
+      success: true,
       data: res,
     };
   }

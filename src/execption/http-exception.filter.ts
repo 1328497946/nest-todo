@@ -32,12 +32,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const nowTime = new Date().getTime();
 
     const errorResponse: Response<object> = {
-      success: false,
-      data: {},
-      message,
       code: status,
+      success: false,
       date: nowTime,
       path: request.url,
+      message,
+      data: {},
     };
     // 将异常记录到logger中
     // this.logger.error(
