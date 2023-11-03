@@ -6,7 +6,7 @@ import { User } from 'src/user/entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
-import { LocalStrategy } from './strategy/local.strategy';
+import { LocalAuthStrategy } from './strategy/localAuth.strategy';
 import { AccessTokenStrategy } from './strategy/accessToken.strategy';
 import { accessTokenGuard } from './guard/accessToken.guard';
 import { ConfigModule } from '@nestjs/config';
@@ -26,7 +26,7 @@ import { RedisModule } from 'src/redis/redis.module';
   providers: [
     AuthService,
     UserService,
-    LocalStrategy,
+    LocalAuthStrategy,
     AccessTokenStrategy,
     RefreshTokenStrategy,
     {

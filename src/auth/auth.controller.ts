@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { LocalAuthGuard } from './guard/auth.guard';
+import { LocalAuthGuard } from './guard/localAuth.guard';
 import { refreshTokenGuard } from './guard/refreshToken.guard';
 import { Request } from 'express';
 import { User } from 'src/user/entity/user.entity';

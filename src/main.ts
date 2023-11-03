@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './response/response.interceptor';
 import { HttpExceptionFilter } from './execption/http-exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,13 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   // 配置全局Exception Filter
   app.useGlobalFilters(new HttpExceptionFilter());
+  const config = new DocumentBuilder()
+    .setTitle('nest-todo')
+    .setDescription('nest-todo api document')
+    .setVersion('1.0.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
   await app.listen(3000);
 }
 bootstrap();
