@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -18,9 +23,7 @@ export class UserService {
 
   // 创建用户
   async createUser(createUserDto: CreateUserDto) {
-    const existingUser = await this.userRepository.findOne({
-      where: { name: createUserDto.name },
-    });
+    const existingUser = await this.getUserByName(createUserDto.name);
     if (existingUser) {
       throw new ConflictException('用户已经存在');
     }
@@ -28,9 +31,12 @@ export class UserService {
     const { password, ...rest } = createUserDto;
     const salt = bcrypt.genSaltSync(saltOrRounds);
     const hash = bcrypt.hashSync(password, salt);
-    Object.assign(rest, { password: hash });
-    const newUser = await this.userRepository.create(rest);
-    return await this.userRepository.save(newUser);
+    const newUser = await this.userRepository.create({
+      ...rest,
+      password: hash,
+    });
+    await this.userRepository.save(newUser);
+    return '注册成功';
   }
 
   // 获取用户列表
@@ -39,8 +45,21 @@ export class UserService {
   }
 
   // 根据ID获取用户
-  async getUserById(user_id: string) {
-    return await this.userRepository.findOne({ where: { user_id } });
+  async getUserById(user_id: string, withPassword = false) {
+    const queryBuilder = this.userRepository.createQueryBuilder();
+    return await queryBuilder
+      .addSelect(withPassword ? 'password' : '')
+      .where({ user_id })
+      .getRawOne();
+  }
+
+  // 根据name获取用户
+  async getUserByName(name: string, withPassword = false) {
+    const queryBuilder = this.userRepository.createQueryBuilder();
+    return await queryBuilder
+      .addSelect(withPassword ? 'password' : '')
+      .where({ name })
+      .getRawOne();
   }
 
   // 通过user_id(UUID)
@@ -55,7 +74,7 @@ export class UserService {
       where: { user_id: userId },
     });
     if (!user) {
-      return '该用户不存在';
+      throw new UnauthorizedException('该用户不存在');
     }
     const { password, ...rest } = updateUserDto;
     if (password) {
@@ -69,24 +88,21 @@ export class UserService {
   }
 
   async deleteUserById(id: string) {
-    const user = await this.userRepository.findOne({ where: { user_id: id } });
+    const user = await this.getUserById(id);
     const refresh_token = user.refresh_token;
     const access_token = user.access_token;
+    if (!user) {
+      throw new UnauthorizedException('该用户不存在');
+    }
     // 将用户的access_token和refresh_token从redis中删除
     if (access_token) {
-      await this.redis.del(
-        `${id}:AccessTokenList:${access_token}`,
-        access_token,
-      );
+      await this.redis.del(`${id}:AccessToken:${access_token}`, access_token);
     }
     if (refresh_token) {
       await this.redis.del(
-        `${id}:RefreshTokenList:${refresh_token}`,
+        `${id}:RefreshToken:${refresh_token}`,
         refresh_token,
       );
-    }
-    if (!user) {
-      return '该用户不存在';
     }
     return await this.userRepository.remove(user);
   }

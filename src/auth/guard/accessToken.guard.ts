@@ -31,7 +31,7 @@ export class accessTokenGuard extends AuthGuard('jwt') {
       if (bearer === 'Bearer' && token) {
         const data: any = await this.jwtService.decode(token);
         const valid = await this.redis.exists(
-          `${data.sub}:AccessTokenList:${token}`,
+          `${data.sub}:AccessToken:${token}`,
         );
         if (valid) {
           return super.canActivate(context);

@@ -2,7 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 
 import { AuthGuard as PassAuthGuard } from '@nestjs/passport';
@@ -14,13 +14,16 @@ export class LocalAuthGuard extends PassAuthGuard('local') {
     const request = context.switchToHttp().getRequest();
     const { name, password } = request.body;
     if (err || !user) {
+      console.log(
+        '🚀 ~ file: localAuth.guard.ts:17 ~ LocalAuthGuard ~ handleRequest ~ err:',
+        err,
+      );
       if (!name) {
-        throw new HttpException({ message: '手机号不能为空' }, HttpStatus.OK);
+        throw new HttpException({ message: '用户名不能为空' }, HttpStatus.OK);
       } else if (!password) {
         throw new HttpException({ message: '密码不能为空' }, HttpStatus.OK);
-      } else {
-        throw err || new UnauthorizedException();
       }
+      throw new InternalServerErrorException('服务器错误');
     }
     return user;
   }

@@ -21,7 +21,7 @@ export class refreshTokenGuard extends AuthGuard('jwt-refresh-token') {
       if (bearer === 'Bearer' && token) {
         const data: any = await this.jwtService.decode(token);
         const valid = await this.redis.exists(
-          `${data.sub}:RefreshTokenList:${token}`,
+          `${data.sub}:RefreshToken:${token}`,
         );
         if (valid) {
           return super.canActivate(context);

@@ -25,7 +25,7 @@ export class AuthService {
   ) {}
 
   async validateUser(name: string, password: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { name } });
+    const user = await this.userService.getUserByName(name, true);
     if (!user) {
       throw new UnauthorizedException('用户不存在');
     }
@@ -41,13 +41,11 @@ export class AuthService {
     // 重复调用login接口需要将之前的accessToken和refreshToken重redis中删除
     // 挤掉登录的情况
     if (user.access_token) {
-      await this.redis.del(
-        `${user.user_id}:AccessTokenList:${user.access_token}`,
-      );
+      await this.redis.del(`${user.user_id}:AccessToken:${user.access_token}`);
     }
     if (user.refresh_token) {
       await this.redis.del(
-        `${user.user_id}:RefreshTokenList:${user.refresh_token}`,
+        `${user.user_id}:RefreshToken:${user.refresh_token}`,
       );
     }
     const tokens = await this.getTokens(payload);
@@ -55,7 +53,7 @@ export class AuthService {
       complete: true,
     });
     await this.redis.setex(
-      `${user.user_id}:AccessTokenList:${tokens.access_token}`,
+      `${user.user_id}:AccessToken:${tokens.access_token}`,
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       tokens.access_token,
     );
@@ -78,13 +76,13 @@ export class AuthService {
     // 将用户的access_token和refresh_token从redis中删除
     if (access_token) {
       await this.redis.del(
-        `${userId}:AccessTokenList:${access_token}`,
+        `${userId}:AccessToken:${access_token}`,
         access_token,
       );
     }
     if (refresh_token) {
       await this.redis.del(
-        `${userId}:RefreshTokenList:${refresh_token}`,
+        `${userId}:RefreshToken:${refresh_token}`,
         refresh_token,
       );
     }
@@ -107,7 +105,7 @@ export class AuthService {
     // 将用户的access_token从redis中删除
     if (access_token) {
       await this.redis.del(
-        `${userId}:AccessTokenList:${access_token}`,
+        `${userId}:AccessToken:${access_token}`,
         access_token,
       );
     }
@@ -119,7 +117,7 @@ export class AuthService {
       complete: true,
     });
     await this.redis.setex(
-      `${user.user_id}:AccessTokenList:${token}`,
+      `${user.user_id}:AccessToken:${token}`,
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       token,
     );
@@ -168,7 +166,7 @@ export class AuthService {
       complete: true,
     });
     await this.redis.setex(
-      `${userId}:RefreshTokenList:${token}`,
+      `${userId}:RefreshToken:${token}`,
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       token,
     );
