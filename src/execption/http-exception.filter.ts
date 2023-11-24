@@ -1,5 +1,6 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
@@ -21,14 +22,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR; // 获取异常状态码
     // 设置错误信息
-    const message = exception.message
-      ? exception.message
-      : `${
-          status >= 500
-            ? '服务器错误（Service Error）'
-            : '客户端错误（Client Error）'
-        }`;
-
+    let message = '';
+    if (exception instanceof BadRequestException) {
+      message = exception?.['response']?.['message'];
+      if (Array.isArray(message)) {
+        message = message[0];
+      }
+    } else {
+      message = exception.message
+        ? exception.message
+        : `${
+            status >= 500
+              ? '服务器错误（Service Error）'
+              : '客户端错误（Client Error）'
+          }`;
+    }
     const nowTime = new Date().getTime();
 
     const errorResponse: Response<object> = {
@@ -37,7 +45,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       date: nowTime,
       path: request.url,
       message,
-      data: {},
     };
     // 将异常记录到logger中
     // this.logger.error(

@@ -48,18 +48,18 @@ export class UserService {
   async getUserById(user_id: string, withPassword = false) {
     const queryBuilder = this.userRepository.createQueryBuilder();
     return await queryBuilder
-      .addSelect(withPassword ? 'password' : '')
+      .addSelect(withPassword ? 'user.password' : '')
       .where({ user_id })
-      .getRawOne();
+      .getOne();
   }
 
   // 根据name获取用户
   async getUserByName(name: string, withPassword = false) {
-    const queryBuilder = this.userRepository.createQueryBuilder();
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
-      .addSelect(withPassword ? 'password' : '')
+      .addSelect(withPassword ? 'user.password' : '')
       .where({ name })
-      .getRawOne();
+      .getOne();
   }
 
   // 通过user_id(UUID)
