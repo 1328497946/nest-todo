@@ -14,10 +14,6 @@ export class LocalAuthGuard extends PassAuthGuard('local') {
     const request = context.switchToHttp().getRequest();
     const { name, password } = request.body;
     if (err || !user) {
-      console.log(
-        '🚀 ~ file: localAuth.guard.ts:17 ~ LocalAuthGuard ~ handleRequest ~ err:',
-        err,
-      );
       if (!name) {
         throw new HttpException({ message: '用户名不能为空' }, HttpStatus.OK);
       } else if (!password) {

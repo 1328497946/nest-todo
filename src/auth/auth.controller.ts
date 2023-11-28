@@ -41,7 +41,7 @@ export class AuthController {
       new ValidationPipe({
         // 删除不是给定dto的字段
         whitelist: true,
-        forbidNonWhitelisted: true,
+        // forbidNonWhitelisted: true,
       }),
     )
     createUserDto: CreateUserDto,
