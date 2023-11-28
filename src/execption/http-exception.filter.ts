@@ -20,10 +20,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR; // 获取异常状态码
+    // 设置错误信息
     let message = '';
-    // validatePipe抛出的BadRequestException错误单独处理
     if (exception instanceof BadRequestException) {
-      message = exception['response']['message'];
+      message = exception?.['response']?.['message'];
       if (Array.isArray(message)) {
         message = message[0];
       }
@@ -44,7 +44,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       date: nowTime,
       path: request.url,
       message,
-      data: {},
     };
     // 将异常记录到logger中
     // this.logger.error(
