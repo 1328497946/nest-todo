@@ -11,8 +11,10 @@ import {
 import { Request } from 'express';
 import { omit } from 'lodash';
 import { UserService } from './user.service';
+import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtPayload } from 'src/auth/interface';
+import { User } from './entity/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -21,8 +23,8 @@ export class UserController {
   @Get()
   // 获取所有用户
   // TODO 分页 pagination
-  getUsers() {
-    return this.userService.getUsers();
+  public getUsers(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
+    return this.userService.getUsers(query);
   }
 
   @Get('/info')

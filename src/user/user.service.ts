@@ -12,6 +12,13 @@ import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
+import {
+  FilterOperator,
+  FilterSuffix,
+  PaginateQuery,
+  paginate,
+  Paginated,
+} from 'nestjs-paginate';
 import { Redis } from 'ioredis';
 
 @Injectable()
@@ -41,8 +48,18 @@ export class UserService {
   }
 
   // 获取用户列表
-  getUsers() {
-    return this.userRepository.find();
+  getUsers(query: PaginateQuery): Promise<Paginated<User>> {
+    return paginate(query, this.userRepository, {
+      sortableColumns: ['id', 'name', 'age'],
+      defaultSortBy: [['id', 'DESC']],
+      searchableColumns: ['name', 'age'],
+      select: ['id', 'name', 'age'],
+      defaultLimit: 10,
+      filterableColumns: {
+        name: [FilterOperator.EQ, FilterSuffix.NOT],
+        age: true,
+      },
+    });
   }
 
   // 根据ID获取用户
