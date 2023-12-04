@@ -68,7 +68,6 @@ export class AuthService {
     };
   }
 
-  // async signup() {}
   async logout(userId: string) {
     const user = await this.userService.getUserById(userId);
     const refresh_token = user.refresh_token;
@@ -86,10 +85,11 @@ export class AuthService {
         refresh_token,
       );
     }
-    return this.userService.updateUserInfoById(userId, {
+    this.userService.updateUserInfoById(userId, {
       access_token: null,
       refresh_token: null,
     });
+    return '退出成功';
   }
 
   async refreshTokens(userId: string, refresh_token: string) {

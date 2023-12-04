@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -18,14 +19,14 @@ export class UserService {
   constructor(
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   // 创建用户
   async createUser(createUserDto: CreateUserDto) {
     const existingUser = await this.getUserByName(createUserDto.name);
     if (existingUser) {
-      throw new ConflictException('用户已经存在');
+      throw new ConflictException('用户已存在');
     }
     const saltOrRounds = this.configService.get('saltOrRounds');
     const { password, ...rest } = createUserDto;
@@ -68,13 +69,13 @@ export class UserService {
     updateUserDto: UpdateUserDto | CreateUserDto,
   ) {
     if (Object.keys(updateUserDto).length === 0) {
-      return;
+      return new BadRequestException('更改信息为空');
     }
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
     });
     if (!user) {
-      throw new UnauthorizedException('该用户不存在');
+      throw new UnauthorizedException('用户不存在');
     }
     const { password, ...rest } = updateUserDto;
     if (password) {
@@ -84,16 +85,17 @@ export class UserService {
       Object.assign(rest, { password: hash });
     }
     await this.userRepository.merge(user, rest);
-    return await this.userRepository.save(user);
+    await this.userRepository.save(user);
+    return '更改成功';
   }
 
   async deleteUserById(id: string) {
     const user = await this.getUserById(id);
+    if (!user) {
+      throw new UnauthorizedException('用户不存在');
+    }
     const refresh_token = user.refresh_token;
     const access_token = user.access_token;
-    if (!user) {
-      throw new UnauthorizedException('该用户不存在');
-    }
     // 将用户的access_token和refresh_token从redis中删除
     if (access_token) {
       await this.redis.del(`${id}:AccessToken:${access_token}`, access_token);
@@ -104,6 +106,7 @@ export class UserService {
         refresh_token,
       );
     }
-    return await this.userRepository.remove(user);
+    await this.userRepository.remove(user);
+    return '删除成功';
   }
 }

@@ -26,6 +26,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  // 登录
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
@@ -35,6 +36,7 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
+  // 注册
   @Post('signup')
   createUser(
     @Body(
@@ -50,11 +52,13 @@ export class AuthController {
   }
 
   @Get('logout')
+  // 退出
   logout(@Req() req: Request) {
     return this.authService.logout(req.user['sub']);
   }
 
   @Public()
+  // 刷新accessToken
   @Get('refreshToken')
   @UseGuards(refreshTokenGuard)
   refreshToken(@Req() req: Request) {

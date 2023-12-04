@@ -5,5 +5,5 @@ export interface Response<T> {
   success: boolean;
   // 接口success不为true的时候，message给错误提示
   message?: string;
-  data?: T;
+  result?: T;
 }
