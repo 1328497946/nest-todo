@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as compression from 'compression';
 import { ResponseInterceptor } from './response/response.interceptor';
 import { HttpExceptionFilter } from './execption/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -7,6 +8,11 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  /**
+   * Compression can greatly decrease the size of the response body
+   * thereby increasing the speed of a web app.
+   */
+  app.use(compression());
   // 全局路由前缀
   app.setGlobalPrefix('api/v1');
   // 允许跨域
