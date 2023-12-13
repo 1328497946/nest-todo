@@ -95,6 +95,17 @@ export class UserService {
     if (!user) {
       throw new UnauthorizedException('用户不存在');
     }
+    if (updateUserDto.name) {
+      const newUser = await this.userRepository.findOne({
+        where: {
+          name: updateUserDto.name,
+        },
+      });
+      // 要更改的新用户名存在，并且不是当前用户
+      if (newUser && newUser.user_id !== userId) {
+        throw new BadRequestException('名称已被占用');
+      }
+    }
     const { password, ...rest } = updateUserDto;
     if (password) {
       const saltOrRounds = this.configService.get<number>('saltOrRounds');
