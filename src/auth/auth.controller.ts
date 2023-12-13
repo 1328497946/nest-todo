@@ -13,7 +13,7 @@ import { Public } from './decorators/public.decorator';
 import { LocalAuthGuard } from './guard/localAuth.guard';
 import { refreshTokenGuard } from './guard/refreshToken.guard';
 import { Request } from 'express';
-import { User } from 'src/user/entity/user.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 
@@ -30,7 +30,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   signIn(@Req() req: Request) {
-    return this.authService.login(req.user as User);
+    return this.authService.login(req.user as UserEntity);
   }
 
   @Public()

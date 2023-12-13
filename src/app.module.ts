@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
+import { AbilityModule } from './ability/ability.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TasksModule } from './tasks/tasks.module';
     RedisModule,
     ScheduleModule.forRoot(),
     TasksModule,
+    AbilityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

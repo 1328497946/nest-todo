@@ -1,4 +1,4 @@
-import { MaxLength, MinLength } from 'class-validator';
+import { IsEnum, MaxLength, MinLength } from 'class-validator';
 import {
   Entity,
   Column,
@@ -7,9 +7,10 @@ import {
   Generated,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Role } from '../interface';
 
 @Entity()
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -41,4 +42,8 @@ export class User {
 
   @Column({ nullable: true })
   refresh_token: string;
+
+  @IsEnum(Role)
+  @Column({ nullable: true })
+  role: string;
 }
