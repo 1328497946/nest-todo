@@ -6,7 +6,6 @@ import {
   UseGuards,
   Get,
   Req,
-  ValidationPipe,
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -39,13 +38,7 @@ export class AuthController {
   // 注册
   @Post('signup')
   createUser(
-    @Body(
-      new ValidationPipe({
-        // 删除不是给定dto的字段
-        whitelist: true,
-        // forbidNonWhitelisted: true,
-      }),
-    )
+    @Body()
     createUserDto: CreateUserDto,
   ) {
     return this.userService.createUser(createUserDto);

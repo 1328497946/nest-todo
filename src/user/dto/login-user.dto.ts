@@ -1,11 +1,6 @@
-import { IsString } from 'class-validator';
+import { OmitType } from '@nestjs/mapped-types';
+import { CreateUserDto } from './create-user.dto';
 
-class LoginUserDto {
-  @IsString()
-  name: string;
-
-  @IsString()
-  password: string;
-}
+class LoginUserDto extends OmitType(CreateUserDto, ['age']) {}
 
 export default LoginUserDto;

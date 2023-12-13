@@ -1,4 +1,3 @@
-// import { Exclude } from 'class-transformer';
 import { MaxLength, MinLength } from 'class-validator';
 import {
   Entity,
@@ -19,13 +18,13 @@ export class User {
   user_id: string;
 
   @Column({ unique: true })
-  @MinLength(5, { message: '用户名不能少于5个字符' })
-  @MaxLength(18, { message: '用户名不长少于18个字符' })
+  @MinLength(5)
+  @MaxLength(18)
   name: string;
 
   @Column({ select: false })
-  @MinLength(6, { message: '密码不能少于5个字符' })
-  @MaxLength(18, { message: '密码不长少于18个字符' })
+  @MinLength(6)
+  @MaxLength(18)
   password: string;
 
   @Column({ nullable: true })

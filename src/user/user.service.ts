@@ -83,10 +83,10 @@ export class UserService {
   // 通过user_id(UUID)
   async updateUserInfoById(
     userId: string,
-    updateUserDto: UpdateUserDto | CreateUserDto,
+    updateUserDto: Partial<UpdateUserDto>,
   ) {
     if (Object.keys(updateUserDto).length === 0) {
-      return new BadRequestException('更改信息为空');
+      throw new BadRequestException('更改信息为空');
     }
     const user = await this.userRepository.findOne({
       where: { user_id: userId },

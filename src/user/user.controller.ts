@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Req,
-  ValidationPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { omit } from 'lodash';
@@ -45,7 +44,8 @@ export class UserController {
   // 根据user_id更改用户信息
   updateUserInfoById(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Body()
+    updateUserDto: UpdateUserDto,
   ) {
     return this.userService.updateUserInfoById(id, updateUserDto);
   }
