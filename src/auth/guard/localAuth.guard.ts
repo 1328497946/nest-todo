@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { AuthGuard as PassAuthGuard } from '@nestjs/passport';
 
@@ -19,7 +14,7 @@ export class LocalAuthGuard extends PassAuthGuard('local') {
       } else if (!password) {
         throw new HttpException({ message: '密码不能为空' }, HttpStatus.OK);
       }
-      throw new InternalServerErrorException('服务器错误');
+      throw err;
     }
     return user;
   }
