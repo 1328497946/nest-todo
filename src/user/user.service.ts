@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserEntity } from './entity/user.entity';
+import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
@@ -25,8 +25,8 @@ import { Redis } from 'ioredis';
 export class UserService {
   constructor(
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -49,7 +49,7 @@ export class UserService {
   }
 
   // 获取用户列表
-  getUsers(query: PaginateQuery): Promise<Paginated<UserEntity>> {
+  getUsers(query: PaginateQuery): Promise<Paginated<User>> {
     return paginate(query, this.userRepository, {
       sortableColumns: ['id', 'name', 'age'],
       defaultSortBy: [['id', 'DESC']],

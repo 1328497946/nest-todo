@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from 'src/user/entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { Action } from './interface';
 import {
   AbilityBuilder,
@@ -10,19 +10,20 @@ import {
 } from '@casl/ability';
 import { Role } from 'src/user/interface';
 
-export type Subjects = InferSubjects<typeof UserEntity> | 'all';
+export type Subjects = InferSubjects<typeof User> | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subjects]>;
 
 @Injectable()
 export class AbilityFactory {
-  defineAbility(user: UserEntity) {
-    const { can, build } = new AbilityBuilder(createMongoAbility);
+  defineAbility(user: User) {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
 
     if (user.role === Role.Admin) {
       can(Action.Manage, 'all');
     } else {
-      can(Action.Read, 'all');
+      can(Action.Read, User);
+      cannot(Action.Create, User).because('没有权限');
     }
     return build({
       detectSubjectType: (item) =>

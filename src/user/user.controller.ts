@@ -12,26 +12,34 @@ import { omit } from 'lodash';
 import { UserService } from './user.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtPayload } from 'src/auth/interface';
-import { UserEntity } from './entity/user.entity';
+import { User } from './entity/user.entity';
+import { AbilityFactory } from 'src/ability/ability.factory';
+import { Action } from 'src/ability/interface';
+import { ForbiddenError } from '@casl/ability';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private abilityFactory: AbilityFactory,
+  ) {}
 
   @Get()
   // 获取所有用户
   // TODO 分页 pagination
   public getUsers(
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<UserEntity>> {
+    @Req() req: Request,
+  ): Promise<Paginated<User>> {
+    const ability = this.abilityFactory.defineAbility(req.user as User);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Create, User);
     return this.userService.getUsers(query);
   }
 
   @Get('/info')
   async getCurrUserInfo(@Req() req: Request) {
-    const payload = req.user as JwtPayload;
-    const user = await this.userService.getUserById(payload.sub);
+    const payload = req.user as User;
+    const user = await this.userService.getUserById(payload.user_id);
     return omit(user, ['access_token', 'refresh_token']);
   }
 

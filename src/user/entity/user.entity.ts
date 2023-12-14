@@ -10,7 +10,7 @@ import {
 import { Role } from '../interface';
 
 @Entity()
-export class UserEntity {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -44,6 +44,6 @@ export class UserEntity {
   refresh_token: string;
 
   @IsEnum(Role)
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: Role.User })
   role: string;
 }

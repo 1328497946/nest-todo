@@ -4,9 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { Repository } from 'typeorm';
+import { User } from 'src/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -17,15 +15,13 @@ import { Redis } from 'ioredis';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
-  async validateUser(name: string, password: string): Promise<UserEntity> {
+  async validateUser(name: string, password: string): Promise<User> {
     const user = await this.userService.getUserByName(name, true);
     if (!user) {
       throw new UnauthorizedException('用户不存在');
@@ -37,7 +33,7 @@ export class AuthService {
     return user;
   }
 
-  async login(user: UserEntity) {
+  async login(user: User) {
     const payload = { name: user.name, sub: user.user_id };
     // 重复调用login接口需要将之前的accessToken和refreshToken重redis中删除
     // 挤掉登录的情况

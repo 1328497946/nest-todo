@@ -8,7 +8,7 @@ import { UserService } from 'src/user/user.service';
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private configService: ConfigService,
+    configService: ConfigService,
     private userService: UserService,
   ) {
     super({
@@ -25,6 +25,6 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       return null;
     }
-    return payload;
+    return user;
   }
 }

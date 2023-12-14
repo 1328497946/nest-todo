@@ -5,7 +5,9 @@ import {
   MaxLength,
   IsNotEmpty,
   MinLength,
+  IsEnum,
 } from 'class-validator';
+import { Role } from '../interface';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -23,4 +25,9 @@ export class CreateUserDto {
   @MinLength(6, { message: '密码不能少于6个字符' })
   @MaxLength(18, { message: '密码不能多于18个字符' })
   password: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(Role)
+  role: string;
 }

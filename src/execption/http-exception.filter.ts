@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'src/response/interface';
 
-@Catch(HttpException)
+@Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   // 如果有日志服务，可以在constructor,中挂载logger处理函数
   constructor(private readonly logger?: Logger) {}
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp(); // 获取请求上下文
     const request = ctx.getRequest(); // 获取请求上下文中的request对象
     const response = ctx.getResponse(); // 获取请求上下文中的response对象

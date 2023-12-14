@@ -13,7 +13,7 @@ import { Public } from './decorators/public.decorator';
 import { LocalAuthGuard } from './guard/localAuth.guard';
 import { refreshTokenGuard } from './guard/refreshToken.guard';
 import { Request } from 'express';
-import { UserEntity } from 'src/user/entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 
@@ -30,7 +30,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   signIn(@Req() req: Request) {
-    return this.authService.login(req.user as UserEntity);
+    return this.authService.login(req.user as User);
   }
 
   @Public()
@@ -47,7 +47,7 @@ export class AuthController {
   @Get('logout')
   // 退出
   logout(@Req() req: Request) {
-    return this.authService.logout(req.user['sub']);
+    return this.authService.logout(req.user['user_id']);
   }
 
   @Public()
@@ -55,7 +55,7 @@ export class AuthController {
   @Get('refreshToken')
   @UseGuards(refreshTokenGuard)
   refreshToken(@Req() req: Request) {
-    const userId = req.user['sub'];
+    const userId = req.user['user_id'];
     const refreshToken = req.user['refresh_token'];
     return this.authService.refreshTokens(userId, refreshToken);
   }
