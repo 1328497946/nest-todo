@@ -1,4 +1,9 @@
-import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Redis } from 'ioredis';
@@ -26,9 +31,16 @@ export class refreshTokenGuard extends AuthGuard('jwt-refresh-token') {
         if (valid) {
           return super.canActivate(context);
         }
-        return false;
+        throw new UnauthorizedException('RefreshToken无效');
       }
     }
     return super.canActivate(context);
+  }
+
+  handleRequest(err, user, info) {
+    if (!user) {
+      throw new UnauthorizedException(err || info);
+    }
+    return user;
   }
 }

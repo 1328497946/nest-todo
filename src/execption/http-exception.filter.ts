@@ -1,3 +1,4 @@
+import { ForbiddenError } from '@casl/ability';
 import {
   ArgumentsHost,
   BadRequestException,
@@ -18,9 +19,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest(); // 获取请求上下文中的request对象
     const response = ctx.getResponse(); // 获取请求上下文中的response对象
     const status =
+      // 获取异常状态码
       exception instanceof HttpException
         ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR; // 获取异常状态码
+        : exception instanceof ForbiddenError
+        ? HttpStatus.FORBIDDEN
+        : HttpStatus.INTERNAL_SERVER_ERROR;
     // 设置错误信息
     let message = '';
     if (exception instanceof BadRequestException) {

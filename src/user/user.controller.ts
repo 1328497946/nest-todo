@@ -15,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entity/user.entity';
 import { AbilityFactory } from 'src/ability/ability.factory';
 import { Action } from 'src/ability/interface';
-import { ForbiddenError } from '@casl/ability';
+import { ForbiddenError } from 'src/ability/ability.factory';
 
 @Controller('user')
 export class UserController {
@@ -32,7 +32,7 @@ export class UserController {
     @Req() req: Request,
   ): Promise<Paginated<User>> {
     const ability = this.abilityFactory.defineAbility(req.user as User);
-    ForbiddenError.from(ability).throwUnlessCan(Action.Create, User);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, req.user);
     return this.userService.getUsers(query);
   }
 
@@ -52,17 +52,23 @@ export class UserController {
 
   @Patch(':id')
   // 根据user_id更改用户信息
-  updateUserInfoById(
+  async updateUserInfoById(
     @Param('id') id: string,
     @Body()
     updateUserDto: UpdateUserDto,
+    @Req() req: Request,
   ) {
-    return this.userService.updateUserInfoById(id, updateUserDto);
+    const user = await this.userService.getUserById(id);
+    const ability = this.abilityFactory.defineAbility(req.user as User);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Update, user);
+    return this.userService.updateUserInfoById(user, updateUserDto);
   }
 
   // 更具user_id删除用户
   @Delete(':id')
-  deleteUserById(@Param('id') id: string) {
+  deleteUserById(@Param('id') id: string, @Req() req: Request) {
+    const ability = this.abilityFactory.defineAbility(req.user as User);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, req.user);
     return this.userService.deleteUserById(id);
   }
 }

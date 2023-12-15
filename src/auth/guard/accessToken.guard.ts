@@ -1,4 +1,9 @@
-import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { Reflector } from '@nestjs/core';
@@ -30,15 +35,23 @@ export class accessTokenGuard extends AuthGuard('jwt') {
       const [bearer, token] = request.headers.authorization.split(' ');
       if (bearer === 'Bearer' && token) {
         const data: any = await this.jwtService.decode(token);
-        const valid = await this.redis.exists(
-          `${data.sub}:AccessToken:${token}`,
-        );
-        if (valid) {
-          return super.canActivate(context);
+        if (data && data.sub) {
+          const valid = await this.redis.exists(
+            `${data.sub}:AccessToken:${token}`,
+          );
+          if (valid) {
+            return super.canActivate(context);
+          }
         }
-        return false;
+        throw new UnauthorizedException('Token无效');
       }
     }
     return super.canActivate(context);
+  }
+  handleRequest(err, user, info) {
+    if (!user) {
+      throw new UnauthorizedException(err || info);
+    }
+    return user;
   }
 }

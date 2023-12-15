@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -54,10 +49,10 @@ export class AuthService {
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       tokens.access_token,
     );
-    await this.userService.updateUserInfoById(user.user_id, {
+    await this.userService.updateUserInfoById(user, {
       access_token: tokens.access_token,
     });
-    this.updateRefreshToken(user.user_id, tokens.refresh_token);
+    this.updateRefreshToken(user, tokens.refresh_token);
     delete user.password;
     return {
       ...user,
@@ -82,29 +77,17 @@ export class AuthService {
         refresh_token,
       );
     }
-    this.userService.updateUserInfoById(userId, {
+    this.userService.updateUserInfoById(user, {
       access_token: null,
       refresh_token: null,
     });
     return '退出成功';
   }
 
-  async refreshTokens(userId: string, refresh_token: string) {
-    const user = await this.userService.getUserById(userId);
-    if (!user || !user.refresh_token) {
-      throw new ForbiddenException('Access Denied');
-    }
-    const isMatch = refresh_token === user.refresh_token;
-    if (!isMatch) {
-      throw new ForbiddenException('Access Denied');
-    }
-    const access_token = user.access_token;
+  async refreshTokens(user: User) {
     // 将用户的access_token从redis中删除
-    if (access_token) {
-      await this.redis.del(
-        `${userId}:AccessToken:${access_token}`,
-        access_token,
-      );
+    if (user.access_token) {
+      await this.redis.del(`${user.user_id}:AccessToken:${user.access_token}`);
     }
     const token = await this.getAccessToken({
       name: user.name,
@@ -118,7 +101,7 @@ export class AuthService {
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       token,
     );
-    await this.userService.updateUserInfoById(user.user_id, {
+    await this.userService.updateUserInfoById(user, {
       access_token: token,
     });
     return { access_token: token };
@@ -158,16 +141,16 @@ export class AuthService {
   }
 
   // 更新数据库用户的refreshToken
-  async updateRefreshToken(userId: string, token: string) {
+  async updateRefreshToken(user: User, token: string) {
     const data: any = await this.jwtService.decode(token, {
       complete: true,
     });
     await this.redis.setex(
-      `${userId}:RefreshToken:${token}`,
+      `${user.user_id}:RefreshToken:${token}`,
       data.payload.exp - Math.floor(new Date().getTime() / 1000),
       token,
     );
-    await this.userService.updateUserInfoById(userId, {
+    await this.userService.updateUserInfoById(user, {
       refresh_token: token,
     });
   }

@@ -82,18 +82,12 @@ export class UserService {
   }
 
   // 通过user_id(UUID)
-  async updateUserInfoById(
-    userId: string,
-    updateUserDto: Partial<UpdateUserDto>,
-  ) {
-    if (Object.keys(updateUserDto).length === 0) {
-      throw new BadRequestException('更改信息为空');
-    }
-    const user = await this.userRepository.findOne({
-      where: { user_id: userId },
-    });
+  async updateUserInfoById(user: User, updateUserDto: Partial<UpdateUserDto>) {
     if (!user) {
       throw new UnauthorizedException('用户不存在');
+    }
+    if (Object.keys(updateUserDto).length === 0) {
+      throw new BadRequestException('更改信息为空');
     }
     if (updateUserDto.name) {
       const newUser = await this.userRepository.findOne({
@@ -102,7 +96,7 @@ export class UserService {
         },
       });
       // 要更改的新用户名存在，并且不是当前用户
-      if (newUser && newUser.user_id !== userId) {
+      if (newUser && newUser.user_id !== user.user_id) {
         throw new BadRequestException('名称已被占用');
       }
     }
