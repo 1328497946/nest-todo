@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import { UserService } from './user.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 import { AbilityFactory } from 'src/ability/ability.factory';
 import { Action } from 'src/ability/interface';
 import { ForbiddenError } from 'src/ability/ability.factory';

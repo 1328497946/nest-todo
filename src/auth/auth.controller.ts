@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { LocalAuthGuard } from './guard/localAuth.guard';
 import { refreshTokenGuard } from './guard/refreshToken.guard';
-import { User } from 'src/user/entity/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { GUser } from 'src/decorator/user.decorator';

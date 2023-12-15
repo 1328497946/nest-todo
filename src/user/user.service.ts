@@ -1,13 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
@@ -33,7 +28,7 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto) {
     const existingUser = await this.getUserByName(createUserDto.name);
     if (existingUser) {
-      throw new ConflictException('用户已存在');
+      throw new BadRequestException('用户已存在');
     }
     const saltOrRounds = this.configService.get('saltOrRounds');
     const { password, ...rest } = createUserDto;
@@ -44,7 +39,7 @@ export class UserService {
       password: hash,
     });
     await this.userRepository.save(newUser);
-    return '注册成功';
+    return '用户注册成功';
   }
 
   // 获取用户列表
@@ -108,7 +103,7 @@ export class UserService {
     }
     await this.userRepository.merge(user, rest);
     await this.userRepository.save(user);
-    return '更改成功';
+    return '用户信息更改成功';
   }
 
   async deleteUserById(id: string) {
@@ -129,6 +124,6 @@ export class UserService {
       );
     }
     await this.userRepository.remove(user);
-    return '删除成功';
+    return '用户删除成功';
   }
 }

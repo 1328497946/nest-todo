@@ -11,6 +11,7 @@ import { RedisModule } from './redis/redis.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
 import { AbilityModule } from './ability/ability.module';
+import { MagneticChainModule } from './magnetic-chain/magnetic-chain.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AbilityModule } from './ability/ability.module';
     ScheduleModule.forRoot(),
     TasksModule,
     AbilityModule,
+    MagneticChainModule,
   ],
   controllers: [AppController],
   providers: [AppService],

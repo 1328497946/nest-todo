@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { User } from 'src/user/entity/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -23,7 +23,7 @@ export class AuthService {
     }
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
-      throw new BadRequestException('密码错误');
+      throw new BadRequestException('用户密码错误');
     }
     return user;
   }
@@ -80,7 +80,7 @@ export class AuthService {
       access_token: null,
       refresh_token: null,
     });
-    return '退出成功';
+    return '退出登陆成功';
   }
 
   async refreshTokens(user: User) {

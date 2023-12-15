@@ -19,7 +19,7 @@ const baseConfig: DataSourceOptions = {
 // 该对象用于 nestjs typeorm 初始化
 export const ormConfig: DataSourceOptions = {
   ...baseConfig,
-  entities: ['dist/**/entity/*.entity{.js,.ts}'],
+  entities: ['dist/**/entities/*.entity{.js,.ts}'],
   migrations: ['dist/src/migrations/*{.js,.ts}'],
   subscribers: ['dist/src/subscribers/*{.js,.ts}'],
 };
@@ -27,7 +27,7 @@ export const ormConfig: DataSourceOptions = {
 // 该对象 typeorm cli 迁移时使用
 const ormConfigForCli: DataSourceOptions = {
   ...baseConfig,
-  entities: ['src/**/entity/*.entity{.js,.ts}'],
+  entities: ['src/**/entities/*.entity{.js,.ts}'],
   // migration:run时查找的文件夹
   migrations: ['src/migrations/*{.js,.ts}'],
   subscribers: ['src/subscribers/*{.js,.ts}'],
