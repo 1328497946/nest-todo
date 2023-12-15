@@ -3,9 +3,11 @@ import { User } from 'src/user/entity/user.entity';
 import { Action } from './interface';
 import {
   AbilityBuilder,
+  AbilityTuple,
   ExtractSubjectType,
   InferSubjects,
   MongoAbility,
+  MongoQuery,
   createMongoAbility,
 } from '@casl/ability';
 import { Role } from 'src/user/interface';
@@ -13,7 +15,7 @@ import { ForbiddenError } from '@casl/ability';
 
 export type Subjects = InferSubjects<typeof User> | 'all';
 
-export type AppAbility = MongoAbility<[Action, Subjects]>;
+export type AppAbility = MongoAbility<AbilityTuple, MongoQuery>;
 
 @Injectable()
 export class AbilityFactory {

@@ -1,3 +1,5 @@
+import { AppAbility } from '../ability.factory';
+
 export enum Action {
   Manage = 'manage',
   Create = 'create',
@@ -5,3 +7,11 @@ export enum Action {
   Update = 'update',
   Delete = 'delete',
 }
+
+interface IPolicyHandler {
+  handle(ability: AppAbility): boolean;
+}
+
+type PolicyHandlerCallback = (ability: AppAbility) => boolean;
+
+export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback;
