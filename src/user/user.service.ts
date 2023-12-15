@@ -3,7 +3,6 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -84,7 +83,7 @@ export class UserService {
   // 通过user_id(UUID)
   async updateUserInfoById(user: User, updateUserDto: Partial<UpdateUserDto>) {
     if (!user) {
-      throw new UnauthorizedException('用户不存在');
+      throw new BadRequestException('用户不存在');
     }
     if (Object.keys(updateUserDto).length === 0) {
       throw new BadRequestException('更改信息为空');
@@ -115,7 +114,7 @@ export class UserService {
   async deleteUserById(id: string) {
     const user = await this.getUserById(id);
     if (!user) {
-      throw new UnauthorizedException('用户不存在');
+      throw new BadRequestException('用户不存在');
     }
     const refresh_token = user.refresh_token;
     const access_token = user.access_token;

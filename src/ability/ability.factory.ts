@@ -18,9 +18,10 @@ export type AppAbility = MongoAbility<[Action, Subjects]>;
 @Injectable()
 export class AbilityFactory {
   defineAbility(user: User) {
-    const { can, build } = new AbilityBuilder(createMongoAbility);
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
     if (user.role === Role.Admin) {
       can(Action.Manage, 'all');
+      cannot(Action.Delete, User, { user_id: { $eq: user.user_id } });
     } else {
       can(Action.Read, User, { user_id: user.user_id });
       can(Action.Update, User, { user_id: user.user_id });

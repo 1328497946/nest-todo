@@ -48,10 +48,4 @@ export class accessTokenGuard extends AuthGuard('jwt') {
     }
     return super.canActivate(context);
   }
-  handleRequest(err, user, info) {
-    if (!user) {
-      throw new UnauthorizedException(err || info);
-    }
-    return user;
-  }
 }

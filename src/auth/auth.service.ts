@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -19,11 +19,11 @@ export class AuthService {
   async validateUser(name: string, password: string): Promise<User> {
     const user = await this.userService.getUserByName(name, true);
     if (!user) {
-      throw new UnauthorizedException('用户不存在');
+      throw new BadRequestException('用户不存在');
     }
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
-      throw new UnauthorizedException('密码错误');
+      throw new BadRequestException('密码错误');
     }
     return user;
   }
@@ -60,20 +60,19 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string) {
-    const user = await this.userService.getUserById(userId);
+  async logout(user: User) {
     const refresh_token = user.refresh_token;
     const access_token = user.access_token;
     // 将用户的access_token和refresh_token从redis中删除
     if (access_token) {
       await this.redis.del(
-        `${userId}:AccessToken:${access_token}`,
+        `${user.user_id}:AccessToken:${access_token}`,
         access_token,
       );
     }
     if (refresh_token) {
       await this.redis.del(
-        `${userId}:RefreshToken:${refresh_token}`,
+        `${user.user_id}:RefreshToken:${refresh_token}`,
         refresh_token,
       );
     }

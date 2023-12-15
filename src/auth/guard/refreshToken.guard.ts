@@ -36,11 +36,4 @@ export class refreshTokenGuard extends AuthGuard('jwt-refresh-token') {
     }
     return super.canActivate(context);
   }
-
-  handleRequest(err, user, info) {
-    if (!user) {
-      throw new UnauthorizedException(err || info);
-    }
-    return user;
-  }
 }

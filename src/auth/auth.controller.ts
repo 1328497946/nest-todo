@@ -5,17 +5,16 @@ import {
   Post,
   UseGuards,
   Get,
-  Req,
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { LocalAuthGuard } from './guard/localAuth.guard';
 import { refreshTokenGuard } from './guard/refreshToken.guard';
-import { Request } from 'express';
 import { User } from 'src/user/entity/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
+import { GUser } from 'src/decorator/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +28,8 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
-  signIn(@Req() req: Request) {
-    return this.authService.login(req.user as User);
+  signIn(@GUser() user: User) {
+    return this.authService.login(user);
   }
 
   @Public()
@@ -46,20 +45,15 @@ export class AuthController {
 
   @Get('logout')
   // 退出
-  logout(@Req() req: Request) {
-    return this.authService.logout(req.user['user_id']);
+  logout(@GUser() user: User) {
+    return this.authService.logout(user);
   }
 
   @Public()
   // 刷新accessToken
   @Get('refreshToken')
   @UseGuards(refreshTokenGuard)
-  refreshToken(@Req() req: Request) {
-    return this.authService.refreshTokens(req.user as User);
+  refreshToken(@GUser() user: User) {
+    return this.authService.refreshTokens(user);
   }
-
-  // @Get('profile')
-  // getProfile(@Request() req) {
-  //   return req.user;
-  // }
 }

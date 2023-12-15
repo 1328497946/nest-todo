@@ -1,13 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
   Patch,
-  Req,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { omit } from 'lodash';
 import { UserService } from './user.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
@@ -16,6 +15,7 @@ import { User } from './entity/user.entity';
 import { AbilityFactory } from 'src/ability/ability.factory';
 import { Action } from 'src/ability/interface';
 import { ForbiddenError } from 'src/ability/ability.factory';
+import { GUser } from 'src/decorator/user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -29,24 +29,28 @@ export class UserController {
   // TODO 分页 pagination
   public getUsers(
     @Paginate() query: PaginateQuery,
-    @Req() req: Request,
+    @GUser() user: User,
   ): Promise<Paginated<User>> {
-    const ability = this.abilityFactory.defineAbility(req.user as User);
-    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, req.user);
+    const ability = this.abilityFactory.defineAbility(user);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, user);
     return this.userService.getUsers(query);
   }
 
   @Get('/info')
-  async getCurrUserInfo(@Req() req: Request) {
-    const payload = req.user as User;
-    const user = await this.userService.getUserById(payload.user_id);
-    return omit(user, ['access_token', 'refresh_token']);
+  async getCurrUserInfo(@GUser() user: User) {
+    const findUser = await this.userService.getUserById(user.user_id);
+    return omit(findUser, ['access_token', 'refresh_token']);
   }
 
   @Get(':id')
   // 根据user_id查询用户
-  async getUserById(@Param('id') id: string) {
-    const user = await this.userService.getUserById(id);
+  async getUserById(@Param('id') id: string, @GUser() user: User) {
+    const findUser = await this.userService.getUserById(id);
+    if (!findUser) {
+      throw new BadRequestException('用户不存在');
+    }
+    const ability = this.abilityFactory.defineAbility(user);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Read, findUser);
     return omit(user, ['access_token', 'refresh_token']);
   }
 
@@ -56,19 +60,20 @@ export class UserController {
     @Param('id') id: string,
     @Body()
     updateUserDto: UpdateUserDto,
-    @Req() req: Request,
+    @GUser() user: User,
   ) {
-    const user = await this.userService.getUserById(id);
-    const ability = this.abilityFactory.defineAbility(req.user as User);
-    ForbiddenError.from(ability).throwUnlessCan(Action.Update, user);
+    const findUser = await this.userService.getUserById(id);
+    const ability = this.abilityFactory.defineAbility(user);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Update, findUser);
     return this.userService.updateUserInfoById(user, updateUserDto);
   }
 
   // 更具user_id删除用户
   @Delete(':id')
-  deleteUserById(@Param('id') id: string, @Req() req: Request) {
-    const ability = this.abilityFactory.defineAbility(req.user as User);
-    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, req.user);
+  async deleteUserById(@Param('id') id: string, @GUser() user: User) {
+    const findUser = await this.userService.getUserById(id);
+    const ability = this.abilityFactory.defineAbility(user);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Delete, findUser);
     return this.userService.deleteUserById(id);
   }
 }
