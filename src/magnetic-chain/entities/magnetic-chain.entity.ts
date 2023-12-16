@@ -1,3 +1,4 @@
+import { Role } from '../../user/interface';
 import {
   Column,
   CreateDateColumn,
@@ -32,4 +33,10 @@ export class MagneticChain {
 
   @CreateDateColumn()
   create_date: string;
+
+  @UpdateDateColumn()
+  update_date: string;
+
+  @Column({ nullable: true, type: 'enum', enum: Role, default: Role.User })
+  create_author: string;
 }

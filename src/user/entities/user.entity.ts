@@ -1,4 +1,3 @@
-import { IsEnum, MaxLength, MinLength } from 'class-validator';
 import {
   Entity,
   Column,
@@ -19,13 +18,9 @@ export class User {
   user_id: string;
 
   @Column({ unique: true })
-  @MinLength(5)
-  @MaxLength(18)
   name: string;
 
   @Column({ select: false })
-  @MinLength(6)
-  @MaxLength(18)
   password: string;
 
   @Column({ nullable: true })
@@ -43,7 +38,6 @@ export class User {
   @Column({ nullable: true })
   refresh_token: string;
 
-  @IsEnum(Role)
-  @Column({ nullable: true, default: Role.User })
+  @Column({ nullable: true, type: 'enum', enum: Role, default: Role.User })
   role: string;
 }
