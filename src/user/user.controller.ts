@@ -77,6 +77,9 @@ export class UserController {
     const findUser = await this.userService.getUserById(id);
     const ability = this.abilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Delete, findUser);
-    return this.userService.deleteUserById(id);
+    if (!findUser) {
+      throw new BadRequestException('用户不存在');
+    }
+    return this.userService.deleteUserById(findUser);
   }
 }

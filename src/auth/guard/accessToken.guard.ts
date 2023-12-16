@@ -43,9 +43,8 @@ export class accessTokenGuard extends AuthGuard('jwt') {
             return super.canActivate(context);
           }
         }
-        throw new UnauthorizedException('Token无效');
       }
     }
-    return super.canActivate(context);
+    throw new UnauthorizedException('Token无效');
   }
 }

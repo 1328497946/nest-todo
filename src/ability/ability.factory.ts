@@ -25,8 +25,9 @@ export class AbilityFactory {
       can(Action.Manage, 'all');
       cannot(Action.Delete, User, { user_id: { $eq: user.user_id } });
     } else {
-      can(Action.Read, User, { user_id: user.user_id });
-      can(Action.Update, User, { user_id: user.user_id });
+      can(Action.Read, 'all');
+      cannot(Action.Read, User, { user_id: { $ne: user.user_id } });
+      cannot(Action.Update, User, { user_id: { $ne: user.user_id } });
     }
     return build({
       detectSubjectType: (item) =>

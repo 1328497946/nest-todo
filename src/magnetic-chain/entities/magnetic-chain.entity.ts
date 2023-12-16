@@ -1,8 +1,10 @@
-import { Role } from '../../user/interface';
+import { User } from '../../user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -37,6 +39,9 @@ export class MagneticChain {
   @UpdateDateColumn()
   update_date: string;
 
-  @Column({ nullable: true, type: 'enum', enum: Role, default: Role.User })
-  create_author: string;
+  @ManyToOne(() => User, (user) => user.magnetic_chains, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
+  user: User;
 }

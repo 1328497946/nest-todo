@@ -103,20 +103,19 @@ export class UserService {
     return '用户信息更改成功';
   }
 
-  async deleteUserById(id: string) {
-    const user = await this.getUserById(id);
-    if (!user) {
-      throw new BadRequestException('用户不存在');
-    }
+  async deleteUserById(user: User) {
     const refresh_token = user.refresh_token;
     const access_token = user.access_token;
     // 将用户的access_token和refresh_token从redis中删除
     if (access_token) {
-      await this.redis.del(`${id}:AccessToken:${access_token}`, access_token);
+      await this.redis.del(
+        `${user.user_id}:AccessToken:${access_token}`,
+        access_token,
+      );
     }
     if (refresh_token) {
       await this.redis.del(
-        `${id}:RefreshToken:${refresh_token}`,
+        `${user.user_id}:RefreshToken:${refresh_token}`,
         refresh_token,
       );
     }

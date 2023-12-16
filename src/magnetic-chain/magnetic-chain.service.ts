@@ -15,6 +15,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class MagneticChainService {
@@ -22,13 +23,14 @@ export class MagneticChainService {
     @InjectRepository(MagneticChain)
     private readonly magneticChainRepository: Repository<MagneticChain>,
   ) {}
-  async create(createMagneticChainDto: CreateMagneticChainDto) {
+  async create(createMagneticChainDto: CreateMagneticChainDto, user: User) {
     const existsMagneticChain = await this.magneticChainRepository.findOne({
       where: { link: createMagneticChainDto.link },
     });
     if (existsMagneticChain) {
       throw new ConflictException('磁力链已存在');
     }
+    createMagneticChainDto.user_id = user.user_id;
     await this.magneticChainRepository.save(createMagneticChainDto);
     return '磁力链添加成功';
   }
@@ -49,7 +51,7 @@ export class MagneticChainService {
   }
 
   async findOne(id: number) {
-    const findMagneticChain = this.magneticChainRepository.findOne({
+    const findMagneticChain = await this.magneticChainRepository.findOne({
       where: {
         id,
       },
@@ -60,25 +62,18 @@ export class MagneticChainService {
     return findMagneticChain;
   }
 
-  async update(id: number, updateMagneticChainDto: UpdateMagneticChainDto) {
+  async update(
+    target: MagneticChain,
+    updateMagneticChainDto: UpdateMagneticChainDto,
+  ) {
     updateMagneticChainDto;
-    const targetMagneticChain = await this.magneticChainRepository.findOne({
-      where: {
-        id,
-      },
-    });
-    if (!targetMagneticChain) {
-      throw new BadRequestException('该磁力链不存在');
-    }
-    await this.magneticChainRepository.merge(
-      targetMagneticChain,
-      updateMagneticChainDto,
-    );
-    await this.magneticChainRepository.save(targetMagneticChain);
+    await this.magneticChainRepository.merge(target, updateMagneticChainDto);
+    await this.magneticChainRepository.save(target);
     return '磁力链信息更改成功';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} magneticChain`;
+  async remove(target: MagneticChain) {
+    await this.magneticChainRepository.remove(target);
+    return '删除磁力链成功';
   }
 }
