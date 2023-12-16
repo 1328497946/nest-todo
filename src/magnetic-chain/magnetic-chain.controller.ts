@@ -20,6 +20,7 @@ import { Action } from 'src/ability/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MagneticChain } from './entities/magnetic-chain.entity';
 import { Repository } from 'typeorm';
+
 @Controller('magnetic-chain')
 export class MagneticChainController {
   constructor(
@@ -38,7 +39,9 @@ export class MagneticChainController {
   }
 
   @Get()
-  findAll(@Paginate() query: PaginateQuery) {
+  findAll(@Paginate() query: PaginateQuery, @GUser() user: User) {
+    const ability = this.abilityFactory.defineAbility(user);
+    ForbiddenError.from(ability).throwUnlessCan(Action.Manage, user);
     return this.magneticChainService.findAll(query);
   }
 
