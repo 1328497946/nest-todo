@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateMagneticChainDto } from './dto/create-magnetic-chain.dto';
 import { UpdateMagneticChainDto } from './dto/update-magnetic-chain.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,7 +24,7 @@ export class MagneticChainService {
       where: { link: createMagneticChainDto.link },
     });
     if (existsMagneticChain) {
-      throw new ConflictException('磁力链已存在');
+      throw new BadRequestException('磁力链已存在');
     }
     createMagneticChainDto['user'] = user;
     await this.magneticChainRepository.save(createMagneticChainDto);
