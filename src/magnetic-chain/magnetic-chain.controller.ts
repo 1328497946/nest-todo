@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MagneticChainService } from './magnetic-chain.service';
 import { CreateMagneticChainDto } from './dto/create-magnetic-chain.dto';
 import { UpdateMagneticChainDto } from './dto/update-magnetic-chain.dto';
+import { Paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Controller('magnetic-chain')
 export class MagneticChainController {
@@ -21,25 +23,25 @@ export class MagneticChainController {
   }
 
   @Get()
-  findAll() {
-    return this.magneticChainService.findAll();
+  findAll(@Paginate() query: PaginateQuery) {
+    return this.magneticChainService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.magneticChainService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id) {
+    return this.magneticChainService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id,
     @Body() updateMagneticChainDto: UpdateMagneticChainDto,
   ) {
     return this.magneticChainService.update(+id, updateMagneticChainDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.magneticChainService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id) {
+    return this.magneticChainService.remove(id);
   }
 }

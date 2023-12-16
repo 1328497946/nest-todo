@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -16,12 +17,19 @@ export class MagneticChain {
   @Column({ unique: true })
   link: string;
 
-  @Column()
-  tag: string;
+  @Column('varchar', {
+    array: true,
+    nullable: true,
+    transformer: {
+      to: (value: string[]) => value.join(','),
+      from: (value: string) => value.split(','),
+    },
+  })
+  tag: string[] | null;
 
   @Column()
   hash: string;
 
   @CreateDateColumn()
-  crate_date: string;
+  create_date: string;
 }

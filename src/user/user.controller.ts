@@ -63,9 +63,12 @@ export class UserController {
     @GUser() user: User,
   ) {
     const findUser = await this.userService.getUserById(id);
+    if (!findUser) {
+      throw new BadRequestException('该用户不存在');
+    }
     const ability = this.abilityFactory.defineAbility(user);
     ForbiddenError.from(ability).throwUnlessCan(Action.Update, findUser);
-    return this.userService.updateUserInfoById(user, updateUserDto);
+    return this.userService.updateUserInfoById(findUser, updateUserDto);
   }
 
   // 更具user_id删除用户
