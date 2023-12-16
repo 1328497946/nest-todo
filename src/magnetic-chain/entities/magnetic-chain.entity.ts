@@ -21,7 +21,6 @@ export class MagneticChain {
   link: string;
 
   @Column('varchar', {
-    array: true,
     nullable: true,
     transformer: {
       to: (value: string[]) => value.join(','),

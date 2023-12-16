@@ -6,6 +6,7 @@ import {
   Generated,
   PrimaryGeneratedColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Role } from '../interface';
 import { MagneticChain } from '../../magnetic-chain/entities/magnetic-chain.entity';
@@ -17,6 +18,7 @@ export class User {
 
   @Column()
   @Generated('uuid')
+  @Index()
   user_id: string;
 
   @Column({ unique: true })
