@@ -30,7 +30,11 @@ export class MagneticChainService {
     if (existsMagneticChain) {
       throw new ConflictException('磁力链已存在');
     }
-    createMagneticChainDto.user_id = user.user_id;
+    createMagneticChainDto['user'] = user;
+    console.log(
+      '🚀 ~ file: magnetic-chain.service.ts:34 ~ MagneticChainService ~ create ~ createMagneticChainDto:',
+      createMagneticChainDto,
+    );
     await this.magneticChainRepository.save(createMagneticChainDto);
     return '磁力链添加成功';
   }

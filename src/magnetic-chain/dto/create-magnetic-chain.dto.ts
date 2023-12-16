@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateMagneticChainDto {
   @IsOptional()
@@ -23,8 +17,4 @@ export class CreateMagneticChainDto {
   @IsString()
   @IsNotEmpty({ message: 'HASH值不能为空' })
   hash: string;
-
-  @IsNotEmpty({ message: '创建者不能为空' })
-  @IsUUID()
-  user_id: string;
 }
